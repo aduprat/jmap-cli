@@ -1,0 +1,37 @@
+#!/usr/local/bin/node
+
+var commander = require('commander');
+var jmap = require('./node_modules/jmap-client/dist/jmap-client.js');
+
+commander
+  .option('-s, --server [value]', 'The jmap server', 'https://localhost')
+  .option('-u, --user [value]', 'The user', 'user@mydomain.org')
+  .option('-p, --password [value]', 'The user password', 'secret')
+  .option('-j, --json [value]', 'The json to send to the command', '{}');
+
+function failedFn(err) {
+  console.log(err);
+}
+
+commander
+  .version('0.0.1')
+  .command('getMailboxes')
+  .action(function () {
+    var client = new jmap.Client(new jmap.RequestTransport(new jmap.QPromiseProvider()));
+    client
+      .withAuthenticationUrl(commander.server + '/authentication')
+      .authPassword(commander.user, commander.password, 'Device name')
+      .then(function(authAccess) {
+          client
+            .withAPIUrl(commander.server + '/jmap')
+            .withAuthenticationToken(authAccess.accessToken)
+            .getMailboxes(JSON.parse(commander.json))
+            .then(function(reply) {
+                console.log(reply);
+            }, function(err) {
+                console.log(err);
+            });
+      }, failedFn);
+  });
+
+commander.parse(process.argv);
