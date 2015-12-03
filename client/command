@@ -13,25 +13,44 @@ function failedFn(err) {
   console.log(err);
 }
 
+function printResult(result) {
+  console.log(result);
+}
+
+function createClient() {
+  var client = new jmap.Client(new jmap.RequestTransport(new jmap.QPromiseProvider()));
+  return client
+    .withAuthenticationUrl(commander.server + '/authentication')
+    .authPassword(commander.user, commander.password, 'Device name')
+    .then(function(authAccess) {
+      return client
+        .withAPIUrl(commander.server + '/jmap')
+        .withAuthenticationToken(authAccess.accessToken);
+    })
+}
+
 commander
   .version('0.0.1')
   .command('getMailboxes')
   .action(function () {
-    var client = new jmap.Client(new jmap.RequestTransport(new jmap.QPromiseProvider()));
-    client
-      .withAuthenticationUrl(commander.server + '/authentication')
-      .authPassword(commander.user, commander.password, 'Device name')
-      .then(function(authAccess) {
-          client
-            .withAPIUrl(commander.server + '/jmap')
-            .withAuthenticationToken(authAccess.accessToken)
-            .getMailboxes(JSON.parse(commander.json))
-            .then(function(reply) {
-                console.log(reply);
-            }, function(err) {
-                console.log(err);
-            });
-      }, failedFn);
+    createClient()
+      .then(function(client) {
+        client
+          .getMailboxes(JSON.parse(commander.json))
+          .then(printResult, failedFn);
+      });
+  });
+
+commander
+  .version('0.0.1')
+  .command('getMessageList')
+  .action(function () {
+    createClient()
+      .then(function(client) {
+        client
+          .getMessageList(JSON.parse(commander.json))
+          .then(printResult, failedFn);
+      });
   });
 
 commander.parse(process.argv);
