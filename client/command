@@ -53,4 +53,16 @@ commander
       });
   });
 
+commander
+  .version('0.0.1')
+  .command('getMessages')
+  .action(function () {
+    createClient()
+      .then(function(client) {
+        client
+          .getMessages(JSON.parse(commander.json))
+          .then(printResult, failedFn);
+      });
+  });
+
 commander.parse(process.argv);
