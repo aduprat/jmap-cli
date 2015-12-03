@@ -1,0 +1,13 @@
+{
+  "name": "jmap-cli",
+  "private": false,
+  "version": "0.0.1",
+  "description": "JMAP client command line",
+  "author": "",
+  "dependencies": {
+    "commander": "2.9.0",
+    "request": "2.67.0",
+    "jmap-client": "git+https://github.com/thomas-hilaire/jmap-client.git#james-demo",
+    "q": "1.4.1"
+  }
+}
